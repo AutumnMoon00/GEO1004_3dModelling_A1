@@ -89,27 +89,21 @@ int main(int argc, const char * argv[]) {
 
         // Read Faces
         for (int j = 0; j < number_of_faces; j++) {
+            faces[j].fid = j;  // ADDED BY ME
             std::getline(input_stream, line);
             std::istringstream line_stream(line);
 
             int outer_ring {1}, inner_rings {}, total_rings {};
             line_stream >> outer_ring >> inner_rings;
             total_rings = outer_ring + inner_rings;
-            std::cout << "Face: " << j << " total rings: " << total_rings << std::endl;
 
             for (int k = 0; k < total_rings; k++) {
-
-                // checking if k is increasing
-                std::cout << "\tk: " << k << std::endl;
-
                 std::getline(input_stream, line);
                 std::istringstream line_stream(line);
                 int num_vertices {};
                 line_stream >> num_vertices;
-//                std::cout << "number of vertices of ring: " << num_vertices << std::endl;
                 if (k == 0) {
                     // outer ring
-                    std::cout << "\touter ring vertices count: " << num_vertices << std::endl;
                     // adding vertices to outer ring list
                     for (int l = 0; l < num_vertices; l++) {
                         int vertex_id;
@@ -119,7 +113,6 @@ int main(int argc, const char * argv[]) {
                 }
                 else {
                     // inner ring
-                    std::cout << "\tinner ring vertices count: " << num_vertices << std::endl;
                     std::list<int> inner_ring_vertices = {};
                     // adding vertices to inner ring list
                     for (int l = 0; l < num_vertices; l++) {
@@ -129,27 +122,21 @@ int main(int argc, const char * argv[]) {
                     }
                     faces[j].inner_rings.emplace_back(inner_ring_vertices);
                 }
-
-                }
-            faces[j].fid = j;  // ADDED BY ME
-            // checking ids in outer ring
-            std::cout << "\touter ring vertices \n\t";
-            for (const auto& id: faces[j].outer_ring){
-                std::cout << id << " ";
             }
-            std::cout << std::endl;
-
-//            faces[j].fid = j;  // ADDED BY ME
-//        faces[j].outer_ring;  // expecting a list
-//        faces[j].inner_rings;  // expecting a list of lists
-//        faces[j].best_plane;  // expecting a Kernel::Plane_3
-//        faces[j].triangulation;  // expecting a Triangulation
-            }
-
         }
+    }
 
-    for (const auto& face: faces) {
-        std::cout << "Face id: " << face.fid << std::endl;
+    for (const auto& [key, face]: faces) {
+        std::cout << "\nFace id: " << face.fid << std::endl << "\touter ring vertices: ";
+        for (const auto& vertex_outer: face.outer_ring) {
+            std::cout << vertex_outer << " ";
+        }
+        for (const auto& inner_ring: face.inner_rings) {
+            std::cout << "\n\tinner ring vertices: ";
+            for (const auto& vertex_inner: inner_ring) {
+                std::cout << vertex_inner << " ";
+            }
+        }
     }
     return 0;
-    }
+}
