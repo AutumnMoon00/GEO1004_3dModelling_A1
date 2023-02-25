@@ -139,9 +139,6 @@ int main(int argc, const char * argv[]) {
     for (auto& [key, face]: faces) {
         std::vector<Point_3> face_vertices {};
 
-//        std::vector<Point_3> outer_ring_vertices_3 {};
-//        std::vector<Point_3> inner_ring_vertices_3 {};
-
         std::cout << "\nFace id: " << face.fid << std::endl << "\touter ring vertices: ";
         for (const auto& vertex_outer: face.outer_ring) {
             std::cout << vertex_outer << " ";
@@ -199,8 +196,6 @@ int main(int argc, const char * argv[]) {
             face.triangulation.insert(inner_points_2.begin(), inner_points_2.end());
             face.triangulation.insert_constraint(inner_points_2.begin(), inner_points_2.end(), true);
         }
-
-
 
         // ////////////////////////////////////////////////////////
 
