@@ -86,7 +86,7 @@ int main(int argc, const char * argv[]) {
 
         // Read vertex header
         std::getline(input_stream, line);
-        std::cout << "Vertex header: " << line << std::endl;
+//        std::cout << "Vertex header: " << line << std::endl;
 
         std::istringstream vertex_header_stream(line);
         int number_of_vertices;
@@ -101,6 +101,7 @@ int main(int argc, const char * argv[]) {
             double x, y, z;
             line_stream >> id >> x >> y >> z;
 //            std::cout << "Vertex " << id << ": (" << x << ", " << y << ", " << z << ")" << std::endl;
+            std::cout << "v " << " " << x << " " << y << " " << z << std::endl;
             vertices[id].id = id;  // ADDED BY ME
             vertices[id].x = x;
             vertices[id].y = y;
@@ -114,7 +115,7 @@ int main(int argc, const char * argv[]) {
         std::istringstream face_header_stream(line);
         int number_of_faces;
         face_header_stream >> number_of_faces;
-        std::cout << "Parsing " << number_of_faces << " faces..." << std::endl;
+//        std::cout << "Parsing " << number_of_faces << " faces..." << std::endl;
 
         // Read Faces
         for (int j = 0; j < number_of_faces; j++) {
@@ -164,16 +165,16 @@ int main(int argc, const char * argv[]) {
 
         std::vector<Point_3> face_vertices{};
 
-        std::cout << "\nFace id: " << face.fid << std::endl << "\touter ring vertices: ";
+//        std::cout << "\nFace id: " << face.fid << std::endl << "\touter ring vertices: ";
         for (const auto &vertex_outer: face.outer_ring) {
-            std::cout << vertex_outer << " ";
+//            std::cout << vertex_outer << " ";
             face_vertices.emplace_back(
                     Point_3(vertices[vertex_outer].x, vertices[vertex_outer].y, vertices[vertex_outer].z));
         }
         for (const auto &inner_ring: face.inner_rings) {
-            std::cout << "\n\tinner ring vertices: ";
+//            std::cout << "\n\tinner ring vertices: ";
             for (const auto &vertex_inner: inner_ring) {
-                std::cout << vertex_inner << " ";
+//                std::cout << vertex_inner << " ";
                 face_vertices.emplace_back(
                         Point_3(vertices[vertex_inner].x, vertices[vertex_inner].y, vertices[vertex_inner].z));
             }
@@ -186,9 +187,9 @@ int main(int argc, const char * argv[]) {
         Plane_3 plane = faces[key].best_plane;
 
         // Output the plane equation and RMS error
-        std::cout << "\n\tnumber of vertices: " << face_vertices.size();
-        std::cout << "\n\tPlane equation: " << faces[key].best_plane << std::endl;
-        std::cout << "\tRMS error: " << rms << std::endl;
+//        std::cout << "\n\tnumber of vertices: " << face_vertices.size();
+//        std::cout << "\n\tPlane equation: " << faces[key].best_plane << std::endl;
+//        std::cout << "\tRMS error: " << rms << std::endl;
 
         // projecting points onto best_fitting plane
         std::vector<Point_2> proj_points {};
@@ -197,7 +198,7 @@ int main(int argc, const char * argv[]) {
 //            std::cout << plane.to_2d(pt_3) << std::endl;
         }
 
-        std::cout << "\t==================" << std::endl;
+//        std::cout << "\t==================" << std::endl;
         Point_2 pt_o, pt_i;
         std::map<Point_2, int> proj_2d_to_vertex;
 
@@ -237,8 +238,8 @@ int main(int argc, const char * argv[]) {
             num_triangles++;
             total_triangles++;
         }
-        std::cout << "\tNumber of triangles: " << num_triangles << std::endl;
-        std::cout << "\ttotal number of triangles: " << total_triangles;
+//        std::cout << "\tNumber of triangles: " << num_triangles << std::endl;
+//        std::cout << "\ttotal number of triangles: " << total_triangles;
 
 
         try {
@@ -269,7 +270,8 @@ int main(int argc, const char * argv[]) {
                                            to_check.front()->info().interior);
 //                            std::cout << "\n\tinside try 77!!" << std::endl;
                         }
-                    } else {
+                    }
+                    else {
 //                        std::cout << "\n\tinside try 1111!!" << std::endl;
                         to_check.front()->neighbor(neighbour)->info().processed = true;
                         CGAL_assertion(to_check.front()->neighbor(neighbour)->info().processed == true);
@@ -291,7 +293,7 @@ int main(int argc, const char * argv[]) {
 //            std::cout << "\n\tinside try 99!!" << std::endl;
         }
         catch (const std::exception& e) {
-            std::cout << "Exception caught: " << e.what() << std::endl;
+//            std::cout << "Exception caught: " << e.what() << std::endl;
             continue;
         }
 
@@ -299,7 +301,7 @@ int main(int argc, const char * argv[]) {
         int tri_count {0};
         for (FaceIterator fit = face.triangulation.finite_faces_begin(); fit != face.triangulation.finite_faces_end(); ++fit)
         {
-            std::cout << "\n\ttringle: " << tri_count << "\tinterior: " << fit->info().interior;
+//            std::cout << "\n\ttringle: " << tri_count << "\tinterior: " << fit->info().interior;
             tri_count++;
         }
 
@@ -310,9 +312,11 @@ int main(int argc, const char * argv[]) {
             auto v1 = fit->vertex(0)->point();
             auto v2 = fit->vertex(1)->point();
             auto v3 = fit->vertex(2)->point();
-            std::cout << "\n\tTriangle vertices: " << v1 << ", " << v2 << ", " << v3 << std::endl;
+//            std::cout << "\n\tTriangle vertices: " << v1 << ", " << v2 << ", " << v3 << std::endl;
             vert1 = proj_2d_to_vertex[v1]; vert2 = proj_2d_to_vertex[v2]; vert3 = proj_2d_to_vertex[v3];
-            std::cout << "\tvertices: " << vert1 << ", " << vert2 << ", " << vert3 << std::endl;
+//            std::cout << "\tvertices: " << vert1 << ", " << vert2 << ", " << vert3 << std::endl;
+            std::cout << "f " << vert1+1 << " " << vert2+1 << " " << vert3+1 << std::endl;
+
         }
 
 
