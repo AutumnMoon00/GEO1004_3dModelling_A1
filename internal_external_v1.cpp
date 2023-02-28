@@ -1,3 +1,6 @@
+//
+// Created by Sharath Chandra on 28-Feb-23.
+//
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -55,6 +58,7 @@ typedef Kernel::Point_2 Point_2;
 
 typedef Triangulation::Finite_vertices_iterator Finite_vertices_iterator;
 typedef Triangulation::Finite_faces_iterator FaceIterator;
+typedef Triangulation::Face_handle Face_handle;
 
 
 struct Vertex {
@@ -68,6 +72,7 @@ struct Face {
     std::list<std::list<int>> inner_rings;
     Plane_3 best_plane;
     Triangulation triangulation;
+    std::vector<std::vector<int>> interior_triangles;
 };
 
 typedef CGAL::Constrained_triangulation_face_base_2<Kernel> FaceBase;
@@ -301,11 +306,22 @@ void make_best_fitting_plane(std::map<int, Vertex>& vertices, std::map<int, Face
         std::cout << "\n\t=======================";
         std::cout << "\n\tnumber of triangles: " << face.triangulation.number_of_faces();
         int tri_count {0};
+        Point_2 tri_vertex_2d;
         for (FaceIterator fit = face.triangulation.finite_faces_begin(); fit != face.triangulation.finite_faces_end(); ++fit)
         {
             std::cout << "\n\ttringle: " << tri_count << "\tinterior: " << fit->info().interior;
-            if (fit->info().interior)
+            std::vector<int> triangle_vertices_numbers {};
+            if (fit->info().interior) {
                 interior_triangles++;
+                Face_handle face_handle = fit;
+                for (int k = 0; k < 3; ++k) {
+                    tri_vertex_2d = face_handle->vertex(k)->point();
+                    triangle_vertices_numbers.emplace_back(proj_2d_to_vertex.at(tri_vertex_2d));
+                }
+                face.interior_triangles.emplace_back(triangle_vertices_numbers);
+
+            }
+
             else
                 exterior_triangles++;
             tri_count++;
@@ -344,39 +360,32 @@ int main (int argc, const char * argv[]) {
         std::cout << "\nlength of faces: " << faces.size();
         std::cout << "\n===========================";
 
-        std::vector<int> invalid_face_indices {};
+        std::vector<int> invalid_face_indices{};
         make_best_fitting_plane(vertices, faces, invalid_face_indices);
         std::cout << "\n===========================" << std::endl;
-        for (const auto& i: invalid_face_indices)
+        for (const auto &i: invalid_face_indices)
             std::cout << i << " ";
 
         std::cout << "\n";
         std::map<Point_3, int> xyz_to_index;
-        for (const auto& [i, vertex]: vertices) {
+        for (const auto &[i, vertex]: vertices) {
             std::cout << "v " << vertex.x << " " << vertex.y << " " << vertex.z << "\n";
             xyz_to_index[Point_3(vertex.x, vertex.y, vertex.z)] = i;
         }
-        Plane_3 plane;
-        Point_3 pt, rounded_pt;
-        for (const auto& [fid, face]: faces){
-            plane = face.best_plane;
 
-
-            for (FaceIterator fit = face.triangulation.finite_faces_begin(); fit != face.triangulation.finite_faces_end(); ++fit) {
-
-                for (int i = 0; i < 3; ++i) {
-                    pt = plane.to_3d(fit->vertex(i)->point());
-
-                    rounded_pt = Point_3 (std::round(pt.x() * 1000.0) / 1000.0,
-                                          std::round(pt.y() * 1000.0) / 1000.0,
-                                          std::round(pt.z() * 1000.0) / 1000.0);
-
-                    std::cout << xyz_to_index.at(rounded_pt) << std::endl;
-
-                }
+        for (const auto [k, face]: faces) {
+            for (const auto vertex_vector: face.interior_triangles) {
+                std::cout << "\nf ";
+//                std::set<int> s (vertex_vector.begin(), vertex_vector.end());
+//                if (s.size() < vertex_vector.size()) {
+//                    std::cout << "Vector has duplicates.\n";
+//                }
+                for (auto vertex: vertex_vector)
+                    std::cout << vertex+1 << " ";
             }
-
+//            std::cout << face.interior_triangles.size();
         }
+
 
     }
 }
