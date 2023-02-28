@@ -55,9 +55,11 @@ typedef CGAL::Constrained_Delaunay_triangulation_2<Kernel, TriangulationDataStru
 typedef Kernel::Plane_3 Plane_3;
 typedef Kernel::Point_3 Point_3;
 typedef Kernel::Point_2 Point_2;
+typedef Kernel::Segment_2 Segment_2;
 
 typedef Triangulation::Finite_vertices_iterator Finite_vertices_iterator;
 typedef Triangulation::Finite_faces_iterator FaceIterator;
+typedef Triangulation::Finite_edges_iterator EdgeIterator;
 typedef Triangulation::Face_handle Face_handle;
 
 
@@ -272,36 +274,67 @@ void make_best_fitting_plane(std::map<int, Vertex>& vertices, std::map<int, Face
 
 
         // odd-even labelling
-        std::list<Triangulation::Face_handle> to_check{};
-        face.triangulation.infinite_face()->info().processed = true;
-        to_check.push_back(face.triangulation.infinite_face());
-        while (!to_check.empty()) {
-            CGAL_assertion(to_check.front()->info().processed == true);
-            for (int neighbour = 0; neighbour < 3; ++neighbour) {
-                if (to_check.front()->neighbor(neighbour)->info().processed) {
-                    if (face.triangulation.is_constrained(Triangulation::Edge(to_check.front(), neighbour))) {
-                        CGAL_assertion(to_check.front()->neighbor(neighbour)->info().interior !=
-                                       to_check.front()->info().interior);
-                    }
-                    else {
-                        CGAL_assertion(to_check.front()->neighbor(neighbour)->info().interior ==
-                                       to_check.front()->info().interior);
-                    }
-                }
-                else {
-                    to_check.front()->neighbor(neighbour)->info().processed = true;
-                    CGAL_assertion(to_check.front()->neighbor(neighbour)->info().processed == true);
-                    if (face.triangulation.is_constrained(Triangulation::Edge(to_check.front(), neighbour))) {
-                        to_check.front()->neighbor(neighbour)->info().interior = !to_check.front()->info().interior;
-                        to_check.push_back(to_check.front()->neighbor(neighbour));
-                    } else {
-                        to_check.front()->neighbor(neighbour)->info().interior = to_check.front()->info().interior;
-                        to_check.push_back(to_check.front()->neighbor(neighbour));
+//        std::list<Triangulation::Face_handle> to_check{};
+//        face.triangulation.infinite_face()->info().processed = true;
+//        to_check.push_back(face.triangulation.infinite_face());
+//        while (!to_check.empty()) {
+//            CGAL_assertion(to_check.front()->info().processed == true);
+//            for (int neighbour = 0; neighbour < 3; ++neighbour) {
+//                if (to_check.front()->neighbor(neighbour)->info().processed) {
+//                    if (face.triangulation.is_constrained(Triangulation::Edge(to_check.front(), neighbour))) {
+//                        CGAL_assertion(to_check.front()->neighbor(neighbour)->info().interior !=
+//                                       to_check.front()->info().interior);
+//                    }
+//                    else {
+//                        CGAL_assertion(to_check.front()->neighbor(neighbour)->info().interior ==
+//                                       to_check.front()->info().interior);
+//                    }
+//                }
+//                else {
+//                    to_check.front()->neighbor(neighbour)->info().processed = true;
+//                    CGAL_assertion(to_check.front()->neighbor(neighbour)->info().processed == true);
+//                    if (face.triangulation.is_constrained(Triangulation::Edge(to_check.front(), neighbour))) {
+//                        to_check.front()->neighbor(neighbour)->info().interior = !to_check.front()->info().interior;
+//                        to_check.push_back(to_check.front()->neighbor(neighbour));
+//                    } else {
+//                        to_check.front()->neighbor(neighbour)->info().interior = to_check.front()->info().interior;
+//                        to_check.push_back(to_check.front()->neighbor(neighbour));
+//                    }
+//                }
+//            }
+//            to_check.pop_front();
+//        }
+
+
+
+
+        Point_2 point_outside(1000, 1000);
+        for (FaceIterator fit = face.triangulation.finite_faces_begin(); fit != face.triangulation.finite_faces_end(); ++fit) {
+            int num_of_intersections {0};
+            Point_2 p1 = fit->vertex(0)->point();
+            Point_2 p2 = fit->vertex(1)->point();
+            Point_2 p3 = fit->vertex(2)->point();
+            Point_2 centroid((p1.x() + p2.x() + p3.x()) / 3.0, (p1.y() + p2.y() + p3.y()) / 3.0);
+            std::cout << "Centroid of face: " << centroid << std::endl;
+            Segment_2 line(centroid, point_outside);
+
+            for (EdgeIterator eit = face.triangulation.finite_edges_begin(); eit != face.triangulation.finite_edges_end(); ++eit) {
+                Kernel::Segment_2 edge = face.triangulation.segment(eit);
+                if (face.triangulation.is_constrained(*eit)) {
+                    if (CGAL::do_intersect(line, edge)) {
+//                        std::cout << "Line intersects edge!" << std::endl;
+                        num_of_intersections++;
                     }
                 }
             }
-            to_check.pop_front();
+
+            if (num_of_intersections % 2 == 0)
+                fit->info().interior = false;
+            else
+                fit->info().interior = true;
+
         }
+
 
         std::cout << "\n\t=======================";
         std::cout << "\n\tnumber of triangles: " << face.triangulation.number_of_faces();
