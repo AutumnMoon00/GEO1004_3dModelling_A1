@@ -1,6 +1,3 @@
-//
-// Created by Sharath Chandra on 28-Feb-23.
-//
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -81,9 +78,11 @@ typedef CGAL::Constrained_triangulation_face_base_2<Kernel> FaceBase;
 typedef CGAL::Triangulation_face_base_with_info_2<FaceInfo, Kernel, FaceBase> FaceBaseWithInfo;
 
 const std::string input_file = "stilted_house.hw1";
-const std::string output_file = "stilted_house_v1.obj";
+const std::string output_file = "stilted_house_cpp.obj";
 
 void read_vertices_faces(std::map<int, Vertex>& vertices, std::map<int, Face>& faces) {
+//    std::map<int, Vertex> vertices;
+//    std::map<int, Face> faces;
 
     struct retVals{
         std::map<int, Vertex> ret_v;
@@ -248,12 +247,15 @@ void make_best_fitting_plane(std::map<int, Vertex>& vertices, std::map<int, Face
         std::cout << "\n\tNumber of vertices CDT: " << face.triangulation.number_of_vertices() << std::endl;
 
         int additional_vertex = vertices.size()-1;
-        for (Finite_vertices_iterator vit = face.triangulation.finite_vertices_begin(); vit != face.triangulation.finite_vertices_end(); ++vit) {
+        for (Finite_vertices_iterator vit = face.triangulation.finite_vertices_begin(); vit != face.triangulation.finite_vertices_end(); ++vit){
             std::cout << "\n\tVertex " << i << ": " << vit->point();
             point_error_catch = vit->point();
             try{
                 std::cout << " - " << proj_2d_to_vertex.at(vit->point());
+//                std::cout << "\n\t heehehhehhehehe";
                 std::cout << "\n\tprojected to 3d: " << plane.to_3d(point_error_catch);
+//                std::cout << "\n\tblahprojected to 3d: " << plane.to_3d(vit->point());
+                std::cout << "\n\tI'm here - fucked up";
             }
             catch (const std::out_of_range& e) {
                 additional_vertex++;
@@ -267,11 +269,12 @@ void make_best_fitting_plane(std::map<int, Vertex>& vertices, std::map<int, Face
                 std::cout << " - " << proj_2d_to_vertex.at(vit->point());
                 std::cout << "\n\tprojected to 3d: " << point_error_catch;
             }
+
             i++;
         }
 
 
-        // odd-even labelling - Depth-first search algorithm
+        // odd-even labelling
         std::list<Triangulation::Face_handle> to_check{};
         face.triangulation.infinite_face()->info().processed = true;
         to_check.push_back(face.triangulation.infinite_face());
@@ -301,7 +304,6 @@ void make_best_fitting_plane(std::map<int, Vertex>& vertices, std::map<int, Face
                 }
             }
             catch (...) {
-                to_check.pop_front();
                 continue;
             }
             to_check.pop_front();
@@ -309,7 +311,7 @@ void make_best_fitting_plane(std::map<int, Vertex>& vertices, std::map<int, Face
 
 
 
-//          odd-even labelling - intersection
+
 //        Point_2 point_outside(1000, 1000);
 //        for (FaceIterator fit = face.triangulation.finite_faces_begin(); fit != face.triangulation.finite_faces_end(); ++fit) {
 //            int num_of_intersections {0};
@@ -317,7 +319,7 @@ void make_best_fitting_plane(std::map<int, Vertex>& vertices, std::map<int, Face
 //            Point_2 p2 = fit->vertex(1)->point();
 //            Point_2 p3 = fit->vertex(2)->point();
 //            Point_2 centroid((p1.x() + p2.x() + p3.x()) / 3.0, (p1.y() + p2.y() + p3.y()) / 3.0);
-////            std::cout << "Centroid of face: " << centroid << std::endl;
+//            std::cout << "Centroid of face: " << centroid << std::endl;
 //            Segment_2 line(centroid, point_outside);
 //
 //            for (EdgeIterator eit = face.triangulation.finite_edges_begin(); eit != face.triangulation.finite_edges_end(); ++eit) {
@@ -406,7 +408,7 @@ int main (int argc, const char * argv[]) {
         if (fw.is_open()) {
             std::map<Point_3, int> xyz_to_index;
             for (const auto &[i, vertex]: vertices) {
-                std::cout << "v " << vertex.x << " " << vertex.y << " " << vertex.z << "\n";
+                std::cout << "\nv " << vertex.x << " " << vertex.y << " " << vertex.z;
                 fw << "\nv " << vertex.x << " " << vertex.y << " " << vertex.z;
                 xyz_to_index[Point_3(vertex.x, vertex.y, vertex.z)] = i;
             }
@@ -421,12 +423,7 @@ int main (int argc, const char * argv[]) {
                 }
             }
 
+            fw.close();
         }
-
-
-
-
-
-        fw.close();
     }
 }
